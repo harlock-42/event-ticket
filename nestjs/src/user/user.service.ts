@@ -6,7 +6,6 @@ import { User } from 'src/entities/user.entity';
 export class UserService {
 	constructor(
 		private readonly em: EntityManager,
-
 	) {}
 
 	/*
@@ -15,5 +14,15 @@ export class UserService {
 	async getAll() {
 		const users: User[] = await this.em.find(User, {})
 		return users
+	}
+
+	/*
+	** Create a new user instance
+	*/
+	async createOne(username: string, password: string) {
+		const newUser = new User(username, password)
+		this.em.persist(newUser)
+		this.em.flush()
+		return newUser
 	}
 }

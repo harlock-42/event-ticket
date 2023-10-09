@@ -1,8 +1,12 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20231009165036 extends Migration {
+export class Migration20231009193120 extends Migration {
 
   async up(): Promise<void> {
+    this.addSql('create table "base" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, constraint "base_pkey" primary key ("id"));');
+
+    this.addSql('create table "user" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "username" varchar(255) not null, constraint "user_pkey" primary key ("id"));');
+
     this.addSql('create table "event" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "name" varchar(255) not null, "address" varchar(255) not null, "date_event" timestamptz(0) not null, "owner_id" varchar(255) not null, constraint "event_pkey" primary key ("id"));');
 
     this.addSql('create table "ticket" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "owner_id" varchar(255) not null, "event_id" varchar(255) not null, constraint "ticket_pkey" primary key ("id"));');
@@ -14,7 +18,15 @@ export class Migration20231009165036 extends Migration {
   }
 
   async down(): Promise<void> {
+    this.addSql('alter table "event" drop constraint "event_owner_id_foreign";');
+
+    this.addSql('alter table "ticket" drop constraint "ticket_owner_id_foreign";');
+
     this.addSql('alter table "ticket" drop constraint "ticket_event_id_foreign";');
+
+    this.addSql('drop table if exists "base" cascade;');
+
+    this.addSql('drop table if exists "user" cascade;');
 
     this.addSql('drop table if exists "event" cascade;');
 
