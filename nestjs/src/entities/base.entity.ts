@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey } from "@mikro-orm/core";
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { v4 } from 'uuid'
 
 @Entity()
@@ -6,10 +6,10 @@ export class Base {
 	@PrimaryKey()
 	id: string = v4()
 
-	@PrimaryKey()
+	@Property()
 	createdAt: Date = new Date()
 
-	@PrimaryKey({
+	@Property({
 		onUpdate: () => new Date()
 	})
 	updatedAt: Date = new Date()
