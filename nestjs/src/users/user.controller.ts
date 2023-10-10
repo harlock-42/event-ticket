@@ -11,6 +11,6 @@ export class UserController {
 	) {}
 
 	async getAll() {
-		return this.userService.getAll()
+            return this.userService.getAll()
 	}
 }

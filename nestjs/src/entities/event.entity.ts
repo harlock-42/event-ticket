@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, OneToMany, Property } from "@mikro-orm/core";
+import { Cascade, Entity, ManyToOne, OneToMany, Property } from "@mikro-orm/core";
 import { Base } from "./base.entity";
 import { User } from "./user.entity";
 import { Ticket } from "./ticket.entity";
@@ -18,7 +18,16 @@ export class Event extends Base {
     owner: User
 
     @OneToMany(() => Ticket, (ticket) => ticket.event, {
-        default: []
+        default: [],
+        cascade: [Cascade.ALL]
     })
     tickets: Ticket[]
+
+    constructor(name: string, address: string, dateEvent: Date, owner: User) {
+        super()
+        this.name = name
+        this.address = address
+        this.dateEvent = dateEvent
+        this.owner = owner
+    }
 }

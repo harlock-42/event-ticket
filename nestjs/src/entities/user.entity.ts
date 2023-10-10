@@ -1,4 +1,4 @@
-import { BeforeCreate, BeforeUpdate, Entity, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { BeforeCreate, BeforeUpdate, Entity, OneToMany, PrimaryKey, Property, Unique } from "@mikro-orm/core";
 import { Base } from "./base.entity";
 import { Event } from "./event.entity"
 import { Ticket } from "./ticket.entity";
@@ -6,7 +6,9 @@ import bcrypt from 'bcrypt'
 
 @Entity()
 export class User extends Base {
-	@Property()
+	@Property({
+        unique: true
+    })
 	username: string
 
     @OneToMany(() => Event, (event) => event.owner, {

@@ -3,11 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CacheModule } from '@nestjs/cache-manager';
-import { UserModule } from './user/user.module';
+import { UserModule } from './users/user.module';
 import * as redisStore from 'cache-manager-redis-store'
 import { ConfigModule } from '@nestjs/config';
 import { MikroOrmConfigService } from './mikro-orm-config/mikro-orm-config.service';
 import AuthModule from './auth/auth.module';
+import EventModule from './events/event.module';
+import TicketModule from './tickets/ticket.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import AuthModule from './auth/auth.module';
       port: process.env.REDIS_PORT
     }),
     UserModule,
-    AuthModule
+    AuthModule,
+    EventModule,
+    TicketModule
   ],
   controllers: [AppController],
   providers: [AppService, MikroOrmConfigService],
