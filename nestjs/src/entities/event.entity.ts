@@ -5,7 +5,9 @@ import { Ticket } from "./ticket.entity";
 
 @Entity()
 export class Event extends Base {
-    @Property()
+    @Property({
+        unique: true
+    })
     name: string
 
     @Property()

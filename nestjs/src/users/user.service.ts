@@ -1,5 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Event } from 'src/entities/event.entity';
 import { User } from 'src/entities/user.entity';
 
 @Injectable()
@@ -53,4 +54,5 @@ export class UserService {
             }
         }
 	}
+
 }

@@ -209,6 +209,15 @@
       "schema": "public",
       "indexes": [
         {
+          "columnNames": [
+            "name"
+          ],
+          "composite": false,
+          "keyName": "event_name_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "event_pkey",
           "columnNames": [
             "id"

@@ -14,12 +14,12 @@ export class User extends Base {
     @OneToMany(() => Event, (event) => event.owner, {
         default: []
     })
-    events: Event[]
+    events: Event[] = []
 
     @OneToMany(() => Ticket, (ticket) => ticket.owner, {
         default: []
     })
-    tickets: Ticket[]
+    tickets: Ticket[] = []
 
     @Property()
     password: string
@@ -41,6 +41,8 @@ export class User extends Base {
 		super()
 		this.username = username
         this.password = password
+        this.events = []
+        this.tickets = []
 	}
 
 }
