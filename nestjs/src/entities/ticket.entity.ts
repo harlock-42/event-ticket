@@ -1,4 +1,4 @@
-import { Entity, ManyToOne } from "@mikro-orm/core";
+import { Cascade, Entity, ManyToOne } from "@mikro-orm/core";
 import { Base } from "./base.entity";
 import { User } from "./user.entity";
 import { Event } from "./event.entity";
@@ -6,7 +6,8 @@ import { Event } from "./event.entity";
 @Entity()
 export class Ticket extends Base {
     @ManyToOne(() => User, {
-        nullable: true
+        nullable: true,
+        cascade: [Cascade.PERSIST]
     })
     owner: User
 

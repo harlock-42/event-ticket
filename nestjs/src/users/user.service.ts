@@ -20,10 +20,12 @@ export class UserService {
     /*
     ** Get one user by his username
     */
-    async getOne(username: string) {
+    async getOne(username: string, relations: any[] = []) {
         try {
             const user = await this.em.findOne(User, {
                 username: username
+            }, {
+                populate: relations
             })
             if (!user) throw new HttpException(`${username} doen\'t match with any users`, HttpStatus.BAD_REQUEST)
             return user
@@ -31,7 +33,7 @@ export class UserService {
             if (error instanceof HttpException) {
                 throw new HttpException(error.getResponse(), error.getStatus())
             }
-        }     
+        }
     }
 
 	/*
@@ -54,5 +56,14 @@ export class UserService {
             }
         }
 	}
+
+    /*
+    ** Add an event to the user
+    */
+    async addEvent(userId: string, event: Event) {
+        const user = await this.em.findOne(User, userId)
+        user.events = [...user.events, event] // assign event to the user owner
+        await this.em.flush()
+    }
 
 }
