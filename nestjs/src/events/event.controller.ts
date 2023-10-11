@@ -8,6 +8,9 @@ import CountTicketsDto from "./dto/countTickets.dto";
 import { Public } from "src/auth/decorator/isPublic.decorator";
 import BookTicketDto from "./dto/bookTicket.dto";
 import RemoveBookingDto from "./dto/removeBooking.dto";
+import SetNameEventDto from "./dto/setNameEvent.dto";
+import SetDateEventDto from "./dto/setDateEvent.dto";
+import SetAddressEventDto from "./dto/setAddressEvent.dto";
 
 @ApiTags('Events')
 @Controller('event')
@@ -58,4 +61,44 @@ export default class EventController {
     async removeBooking(@Body() removeBookingDto: RemoveBookingDto, @CurrentUser() user: CurrentUserDto) {
         return this.eventService.removeBooking(user.sub, removeBookingDto.eventName)
     }
+
+    /*
+    ** Set a new name to an event if the user is the owner of the event
+    */
+    @ApiOperation({ summary: 'Set a new name to an event'})
+    @ApiBody({
+        type: SetNameEventDto
+    })
+    @ApiBearerAuth()
+    @Put('setName')
+    async setName(@Body() setNameEventDto: SetNameEventDto, @CurrentUser() user: CurrentUserDto) {
+        return this.eventService.setNameEvent(setNameEventDto, user.sub)
+    }
+    
+    /*
+    ** Set a new date to an event if the user is the owner of the event
+    */
+    @ApiOperation({ summary: 'Set a new name to an event'})
+    @ApiBody({
+        type: SetNameEventDto
+    })
+    @ApiBearerAuth()
+    @Put('setName')
+    async setDate(@Body() setDateEventDto: SetDateEventDto, @CurrentUser() user: CurrentUserDto) {
+        
+    }
+
+    /*
+    ** Set a new address to an event if the user is the owner of the event
+    */
+    @ApiOperation({ summary: 'Set a new name to an event'})
+    @ApiBody({
+        type: SetNameEventDto
+    })
+    @ApiBearerAuth()
+    @Put('setName')
+    async setAddress(@Body() setNameEventDto: SetAddressEventDto, @CurrentUser() user: CurrentUserDto) {
+        
+    }
+
 }

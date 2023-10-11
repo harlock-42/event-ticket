@@ -318,7 +318,7 @@
             "id"
           ],
           "referencedTableName": "public.user",
-          "deleteRule": "set null",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "ticket_event_id_foreign": {

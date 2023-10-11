@@ -7,6 +7,8 @@ import { Ticket } from "src/entities/ticket.entity";
 import { UserService } from "src/users/user.service";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Cache } from "cache-manager";
+import SetNameEventDto from "./dto/setNameEvent.dto";
+import SetDateEventDto from "./dto/setDateEvent.dto";
 
 @Injectable()
 export default class EventService {
@@ -20,39 +22,48 @@ export default class EventService {
     ** Create a new Event's instance
     */
     async createOne({name, address, dateEvent, nbTickets}: CreateEventDto, userId: string) {
-        const owner = this.em.getReference(User, userId) // get the user owner of the event
-        const newEvent = new Event(name, address, dateEvent, owner) // create the event
-        const newTickets = Array.from({ length: nbTickets}).map(() => {
-            return new Ticket(newEvent)
-        }) // create tickets of the event
-        newEvent.tickets = newTickets // assign tickets to the event
-        this.em.persist(newEvent)
-        this.userService.addEvent(owner.id, newEvent)
-        this.em.flush() // save to database
-
-        await this.cacheService.set(`nbTicketsEvent-${name}`, nbTickets, await this.timeToEvent(newEvent))
-        return newEvent
+        try {
+            const owner = this.em.getReference(User, userId) // get the user owner of the event
+            const newEvent = new Event(name, address, dateEvent, owner) // create the event
+            const newTickets = Array.from({ length: nbTickets}).map(() => {
+                return new Ticket(newEvent)
+            }) // create tickets of the event
+            newEvent.tickets = newTickets // assign tickets to the event
+            this.em.persist(newEvent)
+            this.userService.addEvent(owner.id, newEvent)
+            this.em.flush() // save to database
+    
+            await this.cacheService.set(`nbTicketsEvent-${name}`, nbTickets, await this.timeToEvent(newEvent))
+            return newEvent
+        } catch (error) {
+            throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
     }
 
     /*
     ** Get number of ticket still available for an event.
     */
     async countTickets(eventName: string): Promise<number> {
-        const dataCached = await this.cacheService.get(`nbTicketsEvent-${eventName}`)
-        if (dataCached) {
-            return dataCached as number // return the number of ticket available without request the database
-        }
-        const nbTickets = this.em.count(Ticket, {
-            $and: [
-                {owner: null},
-                {
-                    event: {
-                        name: eventName
+        try {
+            // TODO check if the cache has been get
+            const dataCached = await this.cacheService.get(`nbTicketsEvent-${eventName}`)
+            if (dataCached) {
+                return dataCached as number // return the number of ticket available without request the database
+            }
+            const nbTickets = this.em.count(Ticket, {
+                $and: [
+                    {owner: null},
+                    {
+                        event: {
+                            name: eventName
+                        }
                     }
-                }
-            ]
-        }) // get the number of ticket which don't have owner from an event
-        return nbTickets
+                ]
+            }) // get the number of ticket which don't have owner from an event
+            return nbTickets
+        } catch (error) {
+            throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
     }
 
     /*
@@ -99,6 +110,8 @@ export default class EventService {
         } catch (error) {
             if (error instanceof HttpException) {
                 throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
             }
         }
     }
@@ -132,6 +145,8 @@ export default class EventService {
         } catch (error) {
             if (error instanceof HttpException) {
                 throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
             }
         }
     }
@@ -139,7 +154,7 @@ export default class EventService {
     /*
     ** return the number of seconds left before an event
     */
-    async timeToEvent(event: string | Event) {
+    async timeToEvent(event: string | Event): Promise<number> {
         let eventDate: Date
         if (typeof event === 'string') {
             const eventEntity = await this.em.findOne(Event, {
@@ -150,5 +165,68 @@ export default class EventService {
             eventDate = new Date(event.dateEvent)
         }
         return Math.round((eventDate.getTime() - new Date().getTime()) / 1000)
+    }
+
+    /*
+    ** Set a new name to an event.
+    */
+    async setNameEvent({eventName, newName}: SetNameEventDto, userId: string): Promise<Event> {
+        try {
+            const event: Event = await this.em.findOne(Event, {
+                name: eventName
+            }, {
+                populate: ['owner']
+            })
+            if (!event) { // Check if the event exist
+                throw new HttpException(`Event ${eventName} doens\'t exist`, HttpStatus.NOT_FOUND)
+            }
+            if (event.owner.id !== userId) { // Check if the user is the owner of the event
+                throw new HttpException(`The user is not the owner of the event ${eventName}`, HttpStatus.UNAUTHORIZED)
+            }
+            const checkName: Event | null = await this.em.findOne(Event, {
+                name: newName
+            })
+            if (checkName) { // Check if the new name is already used by another event
+                throw new HttpException(`Name ${newName} is already user by another event`, HttpStatus.CONFLICT)
+            }
+            event.name = newName
+            this.em.flush()
+            return event
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+        }
+    }
+
+    /*
+    ** Set a new date for an event.
+    */
+    async setDate({eventName, newDate}: SetDateEventDto, userId: string) {
+        try {
+            const event: Event = await this.em.findOne(Event, {
+                name: eventName
+            }, {
+                populate: ['owner']
+            })
+            if (!event) { // Check if the event exist
+                throw new HttpException(`Event ${eventName} doens\'t exist`, HttpStatus.NOT_FOUND)
+            }
+            if (event.owner.id !== userId) { // Check if the user is the owner of the event
+                throw new HttpException(`The user is not the owner of the event ${eventName}`, HttpStatus.UNAUTHORIZED)
+            }
+            event.dateEvent = new Date(newDate)
+            this.em.flush()
+            return event
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+        }
+
     }
 }
