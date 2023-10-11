@@ -7,7 +7,7 @@ import { Event } from "./event.entity";
 export class Ticket extends Base {
     @ManyToOne(() => User, {
         nullable: true,
-        cascade: [Cascade.PERSIST]
+        cascade: [Cascade.ALL]
     })
     owner: User
 

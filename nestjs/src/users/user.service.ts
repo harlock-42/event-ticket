@@ -1,5 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { BadRequestException, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import { Event } from 'src/entities/event.entity';
 import { User } from 'src/entities/user.entity';
 
@@ -7,6 +9,7 @@ import { User } from 'src/entities/user.entity';
 export class UserService {
 	constructor(
 		private readonly em: EntityManager,
+        @Inject(CACHE_MANAGER) private cacheService: Cache
 	) {}
 
 	/*
@@ -65,5 +68,5 @@ export class UserService {
         user.events = [...user.events, event] // assign event to the user owner
         await this.em.flush()
     }
-
+ 
 }

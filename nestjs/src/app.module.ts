@@ -9,7 +9,6 @@ import { ConfigModule } from '@nestjs/config';
 import { MikroOrmConfigService } from './mikro-orm-config/mikro-orm-config.service';
 import AuthModule from './auth/auth.module';
 import EventModule from './events/event.module';
-import TicketModule from './tickets/ticket.module';
 
 @Module({
   imports: [
@@ -27,7 +26,6 @@ import TicketModule from './tickets/ticket.module';
     UserModule,
     AuthModule,
     EventModule,
-    TicketModule
   ],
   controllers: [AppController],
   providers: [AppService, MikroOrmConfigService],

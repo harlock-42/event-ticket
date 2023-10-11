@@ -32,11 +32,4 @@ export default class AuthController {
     async signin(@Body() signupDto: SignupDto) {
         return this.authService.signin(signupDto.username, signupDto.password)
     }
-
-    @ApiOperation({ summary: 'test auth' })
-    @ApiBearerAuth()
-    @Get()
-    async getProtectedata(@CurrentUser() user) {
-        return user
-    }
 }

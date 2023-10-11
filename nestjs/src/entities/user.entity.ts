@@ -1,4 +1,4 @@
-import { BeforeCreate, BeforeUpdate, Entity, OneToMany, PrimaryKey, Property, Unique } from "@mikro-orm/core";
+import { BeforeCreate, BeforeUpdate, Cascade, Entity, OneToMany, PrimaryKey, Property, Unique } from "@mikro-orm/core";
 import { Base } from "./base.entity";
 import { Event } from "./event.entity"
 import { Ticket } from "./ticket.entity";
@@ -17,7 +17,7 @@ export class User extends Base {
     events: Event[] = []
 
     @OneToMany(() => Ticket, (ticket) => ticket.owner, {
-        default: []
+        default: [],
     })
     tickets: Ticket[] = []
 

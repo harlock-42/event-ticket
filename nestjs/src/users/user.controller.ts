@@ -1,8 +1,10 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Inject, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @Controller('user')
 export class UserController {
 	constructor(
@@ -11,6 +13,6 @@ export class UserController {
 	) {}
 
 	async getAll() {
-            return this.userService.getAll()
+        return this.userService.getAll()
 	}
 }
