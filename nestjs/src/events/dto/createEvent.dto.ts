@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Transform } from "class-transformer"
-import { IsDate, IsDateString, IsDefined, IsEmpty, IsNotEmpty, IsString, MinDate } from "class-validator"
-import { toDate } from "src/utils/cast.helper"
+import { IsDate, IsDateString, IsDefined, IsEmpty, IsNotEmpty, IsNumberString, IsString, Min, MinDate } from "class-validator"
+import { toDate, toNumber } from "src/utils/cast.helper"
 
 export default class CreateEventDto {
     @IsNotEmpty()
@@ -30,6 +30,9 @@ export default class CreateEventDto {
     dateEvent: Date
 
     @IsNotEmpty()
+    @IsNumberString()
+    @Transform(({ value }) => toNumber(value))
+    @Min(1)
     @ApiProperty({
         description: 'Number of tickets available',
         example: 3
