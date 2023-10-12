@@ -1,8 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEmpty, IsNotEmpty } from "class-validator"
+import { Transform } from "class-transformer"
+import { IsDate, IsDateString, IsDefined, IsEmpty, IsNotEmpty, IsString, MinDate } from "class-validator"
+import { toDate } from "src/utils/cast.helper"
 
 export default class CreateEventDto {
     @IsNotEmpty()
+    @IsString()
     @ApiProperty({
         description: 'Name of the event',
         example: 'Oktoberfest'
@@ -17,6 +20,9 @@ export default class CreateEventDto {
     address: string
 
     @IsNotEmpty()
+    @Transform(({ value }) => toDate(value)) // Cast property into Date type
+    @IsDate()
+    @MinDate(new Date())
     @ApiProperty({
         description: 'Date of the event',
         example: '2023-10-18T15:00:00'

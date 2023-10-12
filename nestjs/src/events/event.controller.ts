@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Put, Query } from "@nestjs/common";
 import EventService from "./event.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import CreateEventDto from "./dto/createEvent.dto";
@@ -8,9 +8,8 @@ import CountTicketsDto from "./dto/countTickets.dto";
 import { Public } from "src/auth/decorator/isPublic.decorator";
 import BookTicketDto from "./dto/bookTicket.dto";
 import RemoveBookingDto from "./dto/removeBooking.dto";
-import SetNameEventDto from "./dto/setNameEvent.dto";
-import SetDateEventDto from "./dto/setDateEvent.dto";
-import SetAddressEventDto from "./dto/setAddressEvent.dto";
+import SetNameEventDto from "./dto/setEventProperties.dto";
+import SetEventPropertiesDto from "./dto/setEventProperties.dto";
 
 @ApiTags('Events')
 @Controller('event')
@@ -26,7 +25,15 @@ export default class EventController {
     @ApiBearerAuth()
     @Post('one')
     async createOne(@Body() createEventDto: CreateEventDto, @CurrentUser() user: CurrentUserDto) {
-        return this.eventService.createOne(createEventDto, user.sub)
+        try {
+            return this.eventService.createOne(createEventDto, user.sub)
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+        }
     }
 
     @ApiOperation({ summary: 'Book a ticker by a user'})
@@ -36,7 +43,15 @@ export default class EventController {
     @ApiBearerAuth()
     @Post('book')
     async bookOne(@Body() bookTicketDto: BookTicketDto, @CurrentUser() user: CurrentUserDto) {
-        return this.eventService.bookOne(bookTicketDto.eventName, user.sub)
+        try {
+            return this.eventService.bookOne(bookTicketDto.eventName, user.sub)
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+        }
     }
 
     @ApiOperation({ summary: 'Get the number of ticket still available for an event' })
@@ -49,7 +64,15 @@ export default class EventController {
     @Public()
     @Get('nbTickets')
     async countTickets(@Query() countTicketsDto: CountTicketsDto) {
-        return this.eventService.countTickets(countTicketsDto.name)
+        try {
+            return this.eventService.countTickets(countTicketsDto.name)
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+        }
     }
 
     @ApiOperation({ summary: 'Remove a user from a ticket'})
@@ -59,46 +82,36 @@ export default class EventController {
     @ApiBearerAuth()
     @Put('removeBooking')
     async removeBooking(@Body() removeBookingDto: RemoveBookingDto, @CurrentUser() user: CurrentUserDto) {
-        return this.eventService.removeBooking(user.sub, removeBookingDto.eventName)
+        try {
+            return this.eventService.removeBooking(user.sub, removeBookingDto.eventName)
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+        }
     }
 
     /*
-    ** Set a new name to an event if the user is the owner of the event
+    ** Set new properties to an event if the user is the owner of the event.
     */
-    @ApiOperation({ summary: 'Set a new name to an event'})
+    @ApiOperation({ summary: 'Set new properties to an event'})
     @ApiBody({
-        type: SetNameEventDto
+        type: SetEventPropertiesDto
     })
     @ApiBearerAuth()
-    @Put('setName')
-    async setName(@Body() setNameEventDto: SetNameEventDto, @CurrentUser() user: CurrentUserDto) {
-        return this.eventService.setNameEvent(setNameEventDto, user.sub)
-    }
-    
-    /*
-    ** Set a new date to an event if the user is the owner of the event
-    */
-    @ApiOperation({ summary: 'Set a new name to an event'})
-    @ApiBody({
-        type: SetNameEventDto
-    })
-    @ApiBearerAuth()
-    @Put('setName')
-    async setDate(@Body() setDateEventDto: SetDateEventDto, @CurrentUser() user: CurrentUserDto) {
-        
-    }
-
-    /*
-    ** Set a new address to an event if the user is the owner of the event
-    */
-    @ApiOperation({ summary: 'Set a new name to an event'})
-    @ApiBody({
-        type: SetNameEventDto
-    })
-    @ApiBearerAuth()
-    @Put('setName')
-    async setAddress(@Body() setNameEventDto: SetAddressEventDto, @CurrentUser() user: CurrentUserDto) {
-        
+    @Put('setProperties')
+    async setEventProperties(@Body() setNameEventDto: SetNameEventDto, @CurrentUser() user: CurrentUserDto) {
+        try {
+            return this.eventService.setEventProperties(setNameEventDto, user.sub)
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus())
+            } else {
+                throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+        }
     }
 
 }
