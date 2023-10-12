@@ -21,14 +21,15 @@ export default class EventService {
     ** Create a new Event's instance
     */
     async createOne({name, address, dateEvent, nbTickets}: CreateEventDto, userId: string) {
+        const nameTrimed: string = name.trim()
         const checkEventName: Event | null = await this.em.findOne(Event, {
-            name: name
+            name: nameTrimed
         })
         if (checkEventName) {
-            throw new HttpException(`Event name ${name} is already used by another event`, HttpStatus.CONFLICT)
+            throw new HttpException(`Event name ${nameTrimed} is already used by another event`, HttpStatus.CONFLICT)
         }
         const owner = this.em.getReference(User, userId) // get the user owner of the event
-        const newEvent = new Event(name, address, dateEvent, owner) // create the event
+        const newEvent = new Event(nameTrimed, address.trim(), dateEvent, owner) // create the event
         const newTickets = Array.from({ length: nbTickets}).map(() => {
             return new Ticket(newEvent)
         }) // create tickets of the event
@@ -45,17 +46,23 @@ export default class EventService {
     ** Get number of ticket still available for an event.
     */
     async countTickets(eventName: string): Promise<number> {
-        // TODO check if the cache has been get
-        const dataCached = await this.cacheService.get(`nbTicketsEvent-${eventName}`)
-        if (dataCached) {
-            return dataCached as number // return the number of ticket available without request the database
+        const eventNameTrimed: string = eventName.trim()
+        const event: Event | null = await this.em.findOne(Event, {
+            name: eventNameTrimed
+        })
+        if (!event) { // Check if the event exists
+            throw new HttpException(`Event ${eventNameTrimed} doesn\'t exist`, HttpStatus.NOT_FOUND)
         }
-        const nbTickets = this.em.count(Ticket, {
+        const dataCached: number = await this.cacheService.get<number>(`nbTicketsEvent-${eventNameTrimed}`)
+        if (dataCached) {
+            return dataCached // return the number of ticket available without request the database
+        }
+        const nbTickets: number = await this.em.count(Ticket, {
             $and: [
-                {owner: null},
+                { owner: null },
                 {
                     event: {
-                        name: eventName
+                        name: eventNameTrimed
                     }
                 }
             ]
@@ -69,12 +76,13 @@ export default class EventService {
     ** Check if the event exist and if there is enough ticket available.
     */
     async bookOne(eventName: string, userid: string) {
+        const eventNameTrimed: string = eventName
         const user = this.em.getReference(User, userid)
-        const checkUserTicket = await this.em.findOne(Ticket, {
+        const checkUserTicket: Ticket = await this.em.findOne(Ticket, {
             $and: [
                 {
                     event: {
-                        name: eventName
+                        name: eventNameTrimed
                     },
                     owner: {
                         id: userid
@@ -85,23 +93,23 @@ export default class EventService {
         if (checkUserTicket) {
             throw new HttpException('The user already have a ticket for the event', HttpStatus.UNAUTHORIZED)
         }
-        const ticket = await this.em.findOne(Ticket, {
+        const ticket: Ticket = await this.em.findOne(Ticket, {
             $and: [
                 {
                     event: {
-                        name: eventName
+                        name: eventNameTrimed
                     }
                 },
                 { owner: null }
             ]
         }) // Look for a ticket of the event still available
-        if (!ticket) { // check there is at least one ticket available
-            throw new HttpException(`Event ${eventName} is already full or doens\'t exist`, HttpStatus.NOT_FOUND)
+        if (!ticket) { // check if there is at least one ticket available
+            throw new HttpException(`Event ${eventNameTrimed} is already full or doens\'t exist`, HttpStatus.NOT_FOUND)
         }
         ticket.owner = user
         this.em.flush()
-        const nbTicketsCached = await this.cacheService.get(`nbTicketsEvent-${eventName}`)
-        await this.cacheService.set(`nbTicketsEvent-${eventName}`, nbTicketsCached as number - 1, await this.timeToEvent(eventName)) // remove one ticket to the cache
+        const nbTicketsCached: number = await this.cacheService.get<number>(`nbTicketsEvent-${eventName}`)
+        await this.cacheService.set(`nbTicketsEvent-${eventNameTrimed}`, nbTicketsCached as number - 1, await this.timeToEvent(eventName)) // remove one ticket to the cache
         return ticket
     }
 
@@ -109,11 +117,12 @@ export default class EventService {
     ** remove user's booking uppon an event.
     */
     async removeBooking(userId: string, eventName: string) {
+        const eventNameTrimed: string = eventName.trim()
         const ticket = await this.em.findOne(Ticket, {
             $and: [
                 {
                     event: {
-                        name: eventName
+                        name: eventNameTrimed
                     }
                 },
                 {
@@ -128,8 +137,8 @@ export default class EventService {
         }
         ticket.owner = null
         this.em.flush()
-        const nbTickets: number = await this.cacheService.get<number>(`nbTicketsEvent-${eventName}`)
-        await this.cacheService.set(`nbTicketsEvent-${eventName}`, nbTickets + 1, await this.timeToEvent(eventName)) // add one ticket to ticket's counter in the cache
+        const nbTickets: number = await this.cacheService.get<number>(`nbTicketsEvent-${eventNameTrimed}`)
+        await this.cacheService.set(`nbTicketsEvent-${eventName}`, nbTickets + 1, await this.timeToEvent(eventNameTrimed)) // add one ticket to ticket's counter in the cache
     }
 
     /*
@@ -139,7 +148,7 @@ export default class EventService {
         let eventDate: Date
         if (typeof event === 'string') {
             const eventEntity = await this.em.findOne(Event, {
-                name: event
+                name: event.trim()
             })
             eventDate = eventEntity.dateEvent
         } else {
@@ -153,30 +162,33 @@ export default class EventService {
     ** It can set name, date and address of the event. This three parameters are optional
     */
     async setEventProperties({eventName, newName, newDate, newAddress}: SetEventPropertiesDto, userId: string): Promise<Event> {
+        const eventNameTrimed: string = eventName.trim()
+        
         // General checking
         const event: Event = await this.em.findOne(Event, {
-            name: eventName
+            name: eventNameTrimed
         }, {
             populate: ['owner']
         })
         if (!event) { // Check if the event exist
-            throw new HttpException(`Event ${eventName} doens\'t exist`, HttpStatus.NOT_FOUND)
+            throw new HttpException(`Event ${eventNameTrimed} doens\'t exist`, HttpStatus.NOT_FOUND)
         }
         if (event.owner.id !== userId) { // Check if the user is the owner of the event
-            throw new HttpException(`The user is not the owner of the event ${eventName}`, HttpStatus.UNAUTHORIZED)
+            throw new HttpException(`The user is not the owner of the event ${eventNameTrimed}`, HttpStatus.UNAUTHORIZED)
         }
-
+        
         if (newName && newName != event.name) {
+            const newNameTrimed: string = newName.trim()
             // Checking for the name
             const checkName: Event | null = await this.em.findOne(Event, {
-                name: newName
+                name: newNameTrimed
             })
             if (checkName) { // Check if the new name is already used by another event
-                throw new HttpException(`Name ${newName} is already used by another event`, HttpStatus.CONFLICT)
+                throw new HttpException(`Name ${newNameTrimed} is already used by another event`, HttpStatus.CONFLICT)
             }
-            event.name = newName // assignement of the new name
+            event.name = newNameTrimed // assignement of the new name
         }
-
+        
         if (newDate) {
             // Checking for the date
             const newDateToAssign: Date = new Date(newDate)
@@ -186,8 +198,9 @@ export default class EventService {
             }
             event.dateEvent = newDateToAssign
         }
+
         if (newAddress) {
-            event.address = newAddress
+            event.address = newAddress.trim()
         }
         this.em.flush()
         return event
