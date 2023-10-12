@@ -26,6 +26,7 @@ export default class EventController {
     @Post('one')
     async createOne(@Body() createEventDto: CreateEventDto, @CurrentUser() user: CurrentUserDto) {
         try {
+            return
             return this.eventService.createOne(createEventDto, user.sub)
         } catch (error) {
             if (error instanceof HttpException) {
