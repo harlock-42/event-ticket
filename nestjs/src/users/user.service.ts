@@ -45,6 +45,7 @@ export class UserService {
             const check = await this.em.findOne(User, {
                 username: username
             })
+            console.log('test check user')
             if (check) throw new HttpException(`${username} is already used by another user`, HttpStatus.BAD_REQUEST)
             const newUser = new User(username, password)
             this.em.persist(newUser)
@@ -52,7 +53,7 @@ export class UserService {
             return newUser
         } catch (error) {
             if (error instanceof HttpException) {
-                throw new HttpException(error.message, error.getStatus())
+                throw new HttpException(error.getResponse(), error.getStatus())
             }
         }
 	}
@@ -65,5 +66,4 @@ export class UserService {
         user.events = [...user.events, event] // assign event to the user owner
         await this.em.flush()
     }
- 
 }
