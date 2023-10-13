@@ -9,7 +9,7 @@ const config: Options = {
 	// password: process.env.POSTGRES_PASSWORD,
 	// dbName: process.env.POSTGRES_DB,
 	dbName: 'event-ticket-db',
-    host: 'localhost',
+    host: 'postgres',
     password: '1234',
     user: 'postgres',
 	type: 'postgresql',

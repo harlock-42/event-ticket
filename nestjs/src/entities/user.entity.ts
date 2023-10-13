@@ -41,8 +41,6 @@ export class User extends Base {
 		super()
 		this.username = username
         this.password = password
-        this.events = []
-        this.tickets = []
 	}
 
 }

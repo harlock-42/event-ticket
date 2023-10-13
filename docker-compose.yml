@@ -8,8 +8,6 @@ services:
       - ./.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
     restart: always
 
   pgAdmin:
@@ -25,10 +23,22 @@ services:
   redis:
     image: redis:7.2.1-alpine3.18
     restart: always
-    ports:
-      - '6378:6379'
     volumes:
       - redis:/data
+    env_file:
+      - ./.env
+  
+  nestjs:
+    build:
+      context: ./nestjs/
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
+      - postgres
+    env_file:
+      - ./.env
+    restart: always
 
 volumes:
   postgres_data: {}
