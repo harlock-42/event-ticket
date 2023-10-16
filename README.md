@@ -11,12 +11,14 @@
 ## 3. documentation
 
 [localhost](http://localhost:3000/api)
+<a href="http://localhost:3000/api" target="_blank">localhost:3000/api</a>
 
 ## 4. database visualizer
 
 You a can user pgAdmin to visualize the database
 
 1. [click here](http://localhost:5050)
+<a href="http://localhost:5050" target="_blank">localhost:5050</a>
 
 2. signin to pg admin with the ids written en the .env file in the root of this repository. By default, the ids are :
 | Email Address | Password |
