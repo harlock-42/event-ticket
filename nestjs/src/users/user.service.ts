@@ -27,7 +27,9 @@ export class UserService {
             }, {
                 populate: relations
             })
-            if (!user) throw new HttpException(`${username} doen\'t match with any users`, HttpStatus.BAD_REQUEST)
+            if (!user) { 
+                throw new HttpException(`${username} doen\'t match with any users`, HttpStatus.BAD_REQUEST)
+            }
             return user
         } catch (error) {
             if (error instanceof HttpException) {
@@ -45,14 +47,15 @@ export class UserService {
             const check = await this.em.findOne(User, {
                 username: username
             })
-            console.log('test check user')
-            if (check) throw new HttpException(`${username} is already used by another user`, HttpStatus.BAD_REQUEST)
+            if (check) {
+                throw new HttpException(`${username} is already used by another user`, HttpStatus.BAD_REQUEST)
+            }
             const newUser = new User(username, password)
             this.em.persist(newUser)
             this.em.flush()
             return newUser
         } catch (error) {
-            if (error instanceof HttpException) {
+                if (error instanceof HttpException) {
                 throw new HttpException(error.getResponse(), error.getStatus())
             }
         }

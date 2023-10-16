@@ -22,7 +22,8 @@ export default class AuthController {
     @Post('signup')
     async signup(@Body() signupDto: SignupDto) {
         try {
-            return await this.authService.signup(signupDto)
+            const ret = await this.authService.signup(signupDto)
+            return ret
         } catch (error) {
             if (error instanceof HttpException) {
                 throw new HttpException(error.getResponse(), error.getStatus())

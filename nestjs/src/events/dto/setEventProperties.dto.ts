@@ -1,7 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsOptional, MinDate } from "class-validator"
+import { Transform } from "class-transformer"
+import { IsDate, IsNotEmpty, IsOptional, IsString, MinDate, isString } from "class-validator"
+import { toDate } from "src/utils/cast.helper"
 
 export default class SetEventPropertiesDto {
+	@IsNotEmpty()
+	@IsString()
 	@ApiProperty({
 		description: 'Name of the event',
 		type: 'string',
@@ -9,6 +13,8 @@ export default class SetEventPropertiesDto {
 	})
 	eventName: string
 
+	@IsOptional()
+	@IsString()
 	@ApiProperty({
 		description: 'New name of the event',
 		type: 'string',
@@ -16,15 +22,20 @@ export default class SetEventPropertiesDto {
 	})
 	newName?: string
 
+	@IsOptional()
+    @Transform(({ value }) => toDate(value)) // Cast property into Date type
+    @IsDate() // Check if the cast works
+    @MinDate(new Date())
     @ApiProperty({
 		description: 'Name of the event',
 		type: 'string',
-		example: 'Oktoberfest'
+		example: '2023-10-18T15:00:00'
 	})
-    @IsOptional()
 	newDate?: Date
 
-    @ApiProperty({
+	@IsOptional()
+	@IsString()
+	@ApiProperty({
 		description: 'Address of the event',
 		type: 'string',
 		example: '3 rue des rosiers, 75003, Paris'

@@ -197,6 +197,8 @@ export default class EventService {
                 throw new HttpException('The new date cannot be before the current date', HttpStatus.NOT_ACCEPTABLE)
             }
             event.dateEvent = newDateToAssign
+            const nbTickets: number = await this.cacheService.get<number>(`nbTicketsEvent-${eventName}`)
+            await this.cacheService.set(`nbTicketsEvent-${eventName}`, nbTickets, await this.timeToEvent(event))
         }
 
         if (newAddress) {

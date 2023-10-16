@@ -17,9 +17,7 @@ export default class AuthService {
     */
     async signup({ username, password }: SignupDto) {
         try {
-            console.log(username, password)
             const user = await this.userService.createOne(username, password)
-            console.log(user)
             const payload = {
                 sub: user.id,
                 username: user.username
