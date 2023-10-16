@@ -49,3 +49,10 @@ You a can use pgAdmin to visualize the database.
   | Host Name | Maintenance database | Username | Password |
   | :-------: | :------------------: | :------: | :------: |
   | postgres | event-ticket-db | postgres | 1234 |
+
+## 5. Usage of Swagger
+
+1. Use the /auth/signup route to sign up as a user and obtain an accessToken key.
+2. Click on the green 'Authorize' button located in the top-right corner of the page.
+3. Paste your accessToken key and confirm.
+4. You're now set to use the API with Swagger! :)
